@@ -16,14 +16,14 @@ public class Posts {
     private String content;
 
     @Enumerated(EnumType.STRING)
-    private Status status;
+    private PostStatus status;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
     public Posts(){}
 
-    public Posts(Long id, String title, String content, Status status, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public Posts(Long id, String title, String content, PostStatus status, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.title = title;
         this.content = content;
@@ -56,11 +56,11 @@ public class Posts {
         this.content = content;
     }
 
-    public Status getStatus() {
+    public PostStatus getStatus() {
         return status;
     }
 
-    public void setStatus(Status status) {
+    public void setStatus(PostStatus status) {
         this.status = status;
     }
 

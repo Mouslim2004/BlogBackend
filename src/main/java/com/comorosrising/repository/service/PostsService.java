@@ -1,9 +1,8 @@
 package com.comorosrising.repository.service;
 
 import com.comorosrising.entity.Posts;
-import com.comorosrising.entity.Status;
+import com.comorosrising.entity.PostStatus;
 import com.comorosrising.repository.PostsRepository;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -38,7 +37,7 @@ public class PostsService {
             throw  new IllegalArgumentException("Title must be provided");
         }
         if(posts.getStatus() == null){
-            posts.setStatus(Status.DRAFT);
+            posts.setStatus(PostStatus.DRAFT);
         }
         if(posts.getCreatedAt() == null && posts.getUpdatedAt() == null){
             posts.setCreatedAt(LocalDateTime.now());

@@ -1,5 +1,5 @@
 package com.comorosrising.entity;
 
-public enum Status {
+public enum PostStatus {
     DRAFT, PUBLISHED, ARCHIVED
 }
