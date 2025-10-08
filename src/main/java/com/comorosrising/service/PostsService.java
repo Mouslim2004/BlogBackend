@@ -1,4 +1,4 @@
-package com.comorosrising.repository.service;
+package com.comorosrising.service;
 
 import com.comorosrising.entity.Posts;
 import com.comorosrising.entity.PostStatus;
