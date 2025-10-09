@@ -44,6 +44,9 @@ public class UserService {
         if(user.getPassword() == null || user.getPassword().trim().isEmpty()){
             throw new IllegalArgumentException("Password is required");
         }
+        if(user.getPassword().length() < 8) {
+            throw new IllegalArgumentException("Password must be at least 8 characters");
+        }
         if(!isValidEmail(user.getEmail())){
             throw new IllegalArgumentException("Invalid email format");
         }

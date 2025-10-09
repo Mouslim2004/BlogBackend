@@ -44,6 +44,12 @@ We are going to create a blog for my portfolio using spring boot
 1. We are going to start with the user entity
 2. Now we are going to continue with setting category service 
 
+### Create User and Category controller 
+
+1. For the user we are going to have two controller one to create user(auth) and the other one for others requests
+2. Then as long as we implement user controller we gonna set dto and mapper for user
+3. Then we gonna proceed the same way for category
+
 
 
 

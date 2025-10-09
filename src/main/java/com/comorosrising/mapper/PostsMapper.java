@@ -14,7 +14,12 @@ public class PostsMapper {
                 postsDTO.content(),
                 postsDTO.status(),
                 null,
+                null,
+                null,
+                null,
+                null,
                 null
+
         );
     }
 
