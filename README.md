@@ -42,6 +42,7 @@ We are going to create a blog for my portfolio using spring boot
 ### Create User and Category service within service package
 
 1. We are going to start with the user entity
+2. Now we are going to continue with setting category service 
 
 
 
