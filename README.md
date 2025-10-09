@@ -58,7 +58,10 @@ We are going to create a blog for my portfolio using spring boot
 4. So to hide some of those important details, we need to create another dto w/ less fields or details 
 5. That's why we create UserInfoDTO 
 
+### Assign category to a post 
 
+1. When a post is created it need to be assigned to a category in order to identify what this post is talking about
+2. So we gonna add CategoryDTO to post dto and map to post mapper then improve post service
 
 
 

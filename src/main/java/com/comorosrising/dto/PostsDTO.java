@@ -16,6 +16,14 @@ public record PostsDTO(
         @Size(min = 10, message = "Content must be at least 10 characters")
         String content,
         PostStatus status,
-        UserOutputDTO user
+
+        @NotNull(message = "User ID is required")
+        Long userId,
+
+        @NotNull(message = "Category ID is required")
+        Long categoryId
+
+        //UserOutputDTO user,
+        //CategoryDTO category
 ) {
 }

@@ -1,6 +1,7 @@
 package com.comorosrising.controller;
 
 import com.comorosrising.dto.PostsDTO;
+import com.comorosrising.entity.Posts;
 import com.comorosrising.mapper.PostsMapper;
 import com.comorosrising.service.PostsService;
 import org.springframework.http.HttpStatus;
@@ -28,8 +29,13 @@ public class PostsController {
 
     @PostMapping
     public ResponseEntity<String> createPost(@RequestBody PostsDTO postsDTO){
-        postsService.createPosts(postsMapper.fromDTO(postsDTO));
-        return ResponseEntity.ok("Post created successfully");
+        try {
+            Posts post = postsService.createPosts(postsDTO);
+            PostsDTO responseDTO = postsMapper.toDTO(post);
+            return ResponseEntity.ok("Post created successfully");
+        }catch(IllegalArgumentException e){
+            return ResponseEntity.badRequest().body(null);
+        }
     }
 
     @GetMapping("/{postId}")

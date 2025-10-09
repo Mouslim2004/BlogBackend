@@ -24,6 +24,10 @@ public class CategoryService {
         return categoryRepository.findAll();
     }
 
+    public Category getCategory(Long id){
+        return categoryRepository.findById(id).orElseThrow(() -> new RuntimeException("Category not found"));
+    }
+
     public void createCategory(Category category){
         if(category == null){
             throw new IllegalArgumentException("Category must be provided");
