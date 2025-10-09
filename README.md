@@ -33,7 +33,9 @@ We are going to create a blog for my portfolio using spring boot
 2. Some of them are : User, Comment, Tag, Category
 3. So go to entity package and create them 
 
+### Set the relationship
 
+1. We are going to set the relationship between all entities 
 
 
 
