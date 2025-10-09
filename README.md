@@ -27,6 +27,11 @@ We are going to create a blog for my portfolio using spring boot
 
 ### Refactor application.properties to .yml in order to link to our db
 
+### Create all entity 
+
+1. In this part we are going to set all model of our application 
+2. Some of them are : User, Comment, Tag, Category
+3. So go to entity package and create them 
 
 
 
