@@ -50,7 +50,13 @@ We are going to create a blog for my portfolio using spring boot
 2. Then as long as we implement user controller we gonna set dto and mapper for user
 3. Then we gonna proceed the same way for category
 
+### Improve post service
 
+1. Now we gonna handle the case for the post a post need to be submitted by an user
+2. This is gonna imply some modification on our dto, mapper and controller 
+3. While improving post service we noticed than when we get a post we get also the user but with his credentials as the password
+4. So to hide some of those important details, we need to create another dto w/ less fields or details 
+5. That's why we create UserInfoDTO 
 
 
 

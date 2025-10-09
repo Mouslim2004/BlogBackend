@@ -2,7 +2,11 @@ package com.comorosrising.service;
 
 import com.comorosrising.entity.Posts;
 import com.comorosrising.entity.PostStatus;
+import com.comorosrising.entity.User;
 import com.comorosrising.repository.PostsRepository;
+import com.comorosrising.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -12,10 +16,14 @@ import java.util.Optional;
 @Service
 public class PostsService {
 
-    private final PostsRepository postsRepository;
+    private static final Logger logger = LoggerFactory.getLogger(PostsService.class);
 
-    public PostsService(PostsRepository postsRepository) {
+    private final PostsRepository postsRepository;
+    private final UserService userService;
+
+    public PostsService(PostsRepository postsRepository, UserService userService) {
         this.postsRepository = postsRepository;
+        this.userService = userService;
     }
 
     public List<Posts> getAllPosts(){
@@ -33,6 +41,11 @@ public class PostsService {
     }
 
     public void createPosts(Posts posts){
+        logger.info("Checking if user with id {} exist or not!", posts.getUser().getId());
+        User user = userService.getUser(posts.getUser().getId());
+        if(user == null){
+            throw new IllegalArgumentException("User id must be provided");
+        }
         if(posts.getTitle() == null || posts.getTitle().isBlank()){
             throw  new IllegalArgumentException("Title must be provided");
         }
@@ -47,6 +60,11 @@ public class PostsService {
     }
 
     public boolean updatePosts(Long postId, Posts postToUpdate){
+        logger.info("Checking if user with id {} exist or not!", postToUpdate.getUser().getId());
+        User user = userService.getUser(postToUpdate.getUser().getId());
+        if(user == null){
+            throw new IllegalArgumentException("Unauthorized action");
+        }
         Optional<Posts> postsTOptional = postsRepository.findById(postId);
 
         if (postsTOptional.isPresent()){
@@ -61,6 +79,13 @@ public class PostsService {
     }
 
     public boolean deletePosts(Long postId){
+        Posts posts = postsRepository.findById(postId).orElseThrow(() -> new RuntimeException("Post not found"));
+        if(posts != null){
+            User user = userService.getUser(posts.getUser().getId());
+            if(user == null){
+                throw new IllegalArgumentException("Unauthorized action");
+            }
+        }
         try {
             postsRepository.deleteById(postId);
             return true;

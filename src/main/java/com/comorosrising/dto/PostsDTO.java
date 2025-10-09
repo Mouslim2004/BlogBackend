@@ -1,6 +1,7 @@
 package com.comorosrising.dto;
 
 import com.comorosrising.entity.PostStatus;
+import com.comorosrising.entity.User;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -14,6 +15,7 @@ public record PostsDTO(
         @NotBlank(message = "Content is mandatory")
         @Size(min = 10, message = "Content must be at least 10 characters")
         String content,
-        PostStatus status
+        PostStatus status,
+        UserOutputDTO user
 ) {
 }

@@ -1,6 +1,7 @@
 package com.comorosrising.mapper;
 
 import com.comorosrising.dto.UserDTO;
+import com.comorosrising.dto.UserOutputDTO;
 import com.comorosrising.entity.User;
 import org.springframework.stereotype.Component;
 
@@ -33,4 +34,34 @@ public class UserMapper {
                 user.getDateOfBirth()
         );
     }
+
+    public UserOutputDTO toOutputDTO(User user) {
+        if (user == null) {
+            return null;
+        }
+        return new UserOutputDTO(
+                user.getId(),
+                user.getName(),
+                user.getEmail(),
+                user.getBio(),
+                user.getDateOfBirth(),
+                user.getJoinedAt()
+        );
+    }
+
+    public User fromOutputDTO(UserOutputDTO userOutputDTO) {
+        if (userOutputDTO == null) {
+            return null;
+        }
+        User user = new User();
+        user.setId(userOutputDTO.id());
+        user.setName(userOutputDTO.name());
+        user.setEmail(userOutputDTO.email());
+        user.setBio(userOutputDTO.bio());
+        user.setDateOfBirth(userOutputDTO.dateOfBirth());
+        user.setJoinedAt(userOutputDTO.joinedAt());
+        return user;
+    }
+
+
 }

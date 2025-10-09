@@ -1,6 +1,7 @@
 package com.comorosrising.controller;
 
 import com.comorosrising.dto.UserDTO;
+import com.comorosrising.dto.UserOutputDTO;
 import com.comorosrising.mapper.UserMapper;
 import com.comorosrising.repository.UserRepository;
 import com.comorosrising.service.UserService;
@@ -21,8 +22,8 @@ public class UserController {
     }
 
     @PutMapping("/{userId}")
-    public ResponseEntity<String> updateUser(@PathVariable("userId") Long userId, @RequestBody UserDTO userDTO){
-        boolean userUpdated = userService.updateUser(userId, userMapper.fromDTO(userDTO));
+    public ResponseEntity<String> updateUser(@PathVariable("userId") Long userId, @RequestBody UserOutputDTO userDTO){
+        boolean userUpdated = userService.updateUser(userId, userMapper.fromOutputDTO(userDTO));
         if(userUpdated){
             return ResponseEntity.ok("User updated");
         }

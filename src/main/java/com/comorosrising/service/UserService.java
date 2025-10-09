@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -49,6 +50,12 @@ public class UserService {
         }
         if(!isValidEmail(user.getEmail())){
             throw new IllegalArgumentException("Invalid email format");
+        }
+        if(user.getDateOfBirth().isAfter(LocalDate.now())){
+            throw new IllegalArgumentException("Date of birth must be in the past");
+        }
+        if(user.getDateOfBirth() == null){
+            throw new IllegalArgumentException("Date of birth must be provided");
         }
         if(user.getJoinedAt() == null){
             user.setJoinedAt(LocalDateTime.now());

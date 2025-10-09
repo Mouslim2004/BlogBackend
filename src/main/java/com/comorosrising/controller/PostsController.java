@@ -38,12 +38,12 @@ public class PostsController {
     }
 
     @PutMapping("/{postId}")
-    public ResponseEntity<String> updatePost(@PathVariable("postId") Long postId, @RequestBody PostsDTO postsDTO){
+    public ResponseEntity<?> updatePost(@PathVariable("postId") Long postId, @RequestBody PostsDTO postsDTO){
         boolean updatedPost = postsService.updatePosts(postId, postsMapper.fromDTO(postsDTO));
         if(updatedPost){
             return ResponseEntity.ok("Post updated successfully");
         }
-        return ResponseEntity.ok("Post not found");
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     @DeleteMapping("/{postId}")
