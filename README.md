@@ -37,11 +37,11 @@ We are going to create a blog for my portfolio using spring boot
 
 1. We are going to set the relationship between all entities 
 
+### Create User, Tag, Comment and Category repository within repository package 
 
+### Create User and Category service within service package
 
-
-
-
+1. We are going to start with the user entity
 
 
 
