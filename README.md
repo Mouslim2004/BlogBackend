@@ -63,5 +63,24 @@ We are going to create a blog for my portfolio using spring boot
 1. When a post is created it need to be assigned to a category in order to identify what this post is talking about
 2. So we gonna add CategoryDTO to post dto and map to post mapper then improve post service
 
+### Create all Comment business rule
+
+1. We gonna start by create Comment dto for creating a comment within dto package
+2. Then we gonna create Comment dto for response 
+3. Then we gonna create comment service within service package 
+4. As long as we work with comment service we gonna create comment mapper 
+5. Then create comment controller within controller package 
+6. Finish comment part
+
+
+
+
+
+
+
+
+
+
+
 
 
