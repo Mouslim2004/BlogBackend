@@ -1,19 +1,20 @@
 package com.comorosrising.service;
 
 import com.comorosrising.dto.PostsDTO;
-import com.comorosrising.entity.Category;
-import com.comorosrising.entity.Posts;
-import com.comorosrising.entity.PostStatus;
-import com.comorosrising.entity.User;
+import com.comorosrising.entity.*;
 import com.comorosrising.repository.PostsRepository;
+import com.comorosrising.repository.TagRepository;
 import com.comorosrising.repository.UserRepository;
+import com.comorosrising.utils.TagExtractor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class PostsService {
@@ -23,11 +24,15 @@ public class PostsService {
     private final PostsRepository postsRepository;
     private final UserService userService;
     private final CategoryService categoryService;
+    private final TagRepository tagRepository;
+    private final TagExtractor tagExtractor;
 
-    public PostsService(PostsRepository postsRepository, UserService userService, CategoryService categoryService) {
+    public PostsService(PostsRepository postsRepository, UserService userService, CategoryService categoryService, TagRepository tagRepository, TagExtractor tagExtractor) {
         this.postsRepository = postsRepository;
         this.userService = userService;
         this.categoryService = categoryService;
+        this.tagRepository = tagRepository;
+        this.tagExtractor = tagExtractor;
     }
 
     public List<Posts> getAllPosts(){
@@ -66,15 +71,25 @@ public class PostsService {
         if(user == null) {
             throw new IllegalArgumentException("User not found with id: " + postsDTO.userId());
         }
-
         // Get category
         Category category = categoryService.getCategory(postsDTO.categoryId());
         if(category ==null) {
             throw new IllegalArgumentException("Category not found with id: " + postsDTO.categoryId());
         }
-
         if(postsDTO.title() == null || postsDTO.title().isBlank()){
             throw  new IllegalArgumentException("Title must be provided");
+        }
+        Set<Tag> tags = new HashSet<>();
+        if(postsDTO.content() != null && !postsDTO.content().isBlank()){
+            Set<String> tagNames = tagExtractor.extractTags(postsDTO.content());
+            for(String tagName : tagNames){
+                Tag tag = tagRepository.findByTagName(tagName).orElseGet(() -> {
+                    Tag newTag = new Tag();
+                    newTag.setTagName(tagName);
+                    return tagRepository.save(newTag);
+                });
+                tags.add(tag);
+            }
         }
         Posts post = new Posts();
         post.setTitle(postsDTO.title());
@@ -82,6 +97,7 @@ public class PostsService {
         post.setStatus(postsDTO.status() != null ? postsDTO.status() : PostStatus.DRAFT);
         post.setUser(user);
         post.setCategory(category);
+        post.setTags(tags);
         post.setCreatedAt(LocalDateTime.now());
         post.setUpdatedAt(LocalDateTime.now());
 

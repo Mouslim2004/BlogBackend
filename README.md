@@ -72,6 +72,12 @@ We are going to create a blog for my portfolio using spring boot
 5. Then create comment controller within controller package 
 6. Finish comment part
 
+### We gonna work with the Tag 
+
+1. We want to add the tag when the user will notify on his content word starting with this symbol (#)
+2. So we gonna implement a class to extract tag within a content thanks to that pattern within utils package 
+3. Then we gonna head to post service to get the service when creating a post and try to retrieve tags in content
+
 
 
 
