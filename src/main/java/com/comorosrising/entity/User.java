@@ -40,6 +40,9 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
 
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
     public User() {}
 
     public User(Long id, String name, String email, String password, String bio, LocalDate dateOfBirth, LocalDateTime joinedAt, LocalDateTime updatedAt, Set<Posts> posts, List<Comment> comments) {
@@ -133,5 +136,13 @@ public class User {
 
     public void setDateOfBirth(LocalDate dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
     }
 }

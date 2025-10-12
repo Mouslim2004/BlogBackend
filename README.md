@@ -96,9 +96,22 @@ We are going to create a blog for my portfolio using spring boot
 4. Then go to post service to implement methods
 5. Then finalize by going to post controller to implement api request
 
+### Implement spring security
 
-
-
+1. Right now we can say that we accomplished some of the important task to our application
+2. But yet not the major part as you notice that any individual can modify or delete a post from another user 
+3. Which is not good in a real time app, each user need to have the right to delete or edit only his own posts but not for others
+4. So the solution manage this issue is to implement spring security using jwt 
+5. In this part, as far as I know we gonna need four java class
+6. Firstly we gonna need a custom user details service which is a spring security integration class that bridges our application's user system with spring security's authentication framework(implements user details service and override load by username method)
+7. Secondly we gonna a jwt utility class for creating, parsing et validation of JWT tokens or authentication(generate tokens, extract user/role, validate token)
+8. Thirdly we gonna need a jwt authentication filter class that intercepts every http request to validate jwt tokens and set up spring security authentication (extends once per request filter and override do filter internal)
+9. To close those implementation we gonna need a security config class that defines the overall security behavior (passwordEncoder, authentication manager, cors configuration, filter chain)
+10. First of all We gonna start by adding spring security dependencies
+11. Then we gonna customize our user details service within config package 
+12. Then we gonna create our jwt utility class within the security package 
+13. Then implement jwt auth filter 
+14. Then implement security config class 
 
 
 
