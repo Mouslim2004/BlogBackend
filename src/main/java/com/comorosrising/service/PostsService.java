@@ -4,6 +4,7 @@ import com.comorosrising.dto.PostsDTO;
 import com.comorosrising.dto.TagSearchDTO;
 import com.comorosrising.entity.*;
 import com.comorosrising.mapper.PostsMapper;
+import com.comorosrising.repository.CategoryRepository;
 import com.comorosrising.repository.PostsRepository;
 import com.comorosrising.repository.TagRepository;
 import com.comorosrising.repository.UserRepository;
@@ -27,14 +28,16 @@ public class PostsService {
     private final TagRepository tagRepository;
     private final TagExtractor tagExtractor;
     private final PostsMapper postsMapper;
+    private final CategoryRepository categoryRepository;
 
-    public PostsService(PostsRepository postsRepository, UserService userService, CategoryService categoryService, TagRepository tagRepository, TagExtractor tagExtractor, PostsMapper postsMapper) {
+    public PostsService(PostsRepository postsRepository, UserService userService, CategoryService categoryService, TagRepository tagRepository, TagExtractor tagExtractor, PostsMapper postsMapper, CategoryRepository categoryRepository) {
         this.postsRepository = postsRepository;
         this.userService = userService;
         this.categoryService = categoryService;
         this.tagRepository = tagRepository;
         this.tagExtractor = tagExtractor;
         this.postsMapper = postsMapper;
+        this.categoryRepository = categoryRepository;
     }
 
     public List<Posts> getAllPosts(){
@@ -221,4 +224,79 @@ public class PostsService {
         return relatedPosts.stream().map(postsMapper::toDTO).collect(Collectors.toList());
 
     }
+
+
+    //Methods for looking for a post by title, category or content
+
+    //Search a post by content
+    public List<PostsDTO> searchByContent(String content){
+        if(content == null || content.trim().isEmpty()){
+            throw new IllegalArgumentException("Content cannot be empty");
+        }
+        List<Posts> posts = postsRepository.findByContentContaining(content.trim());
+        return posts.stream().map(postsMapper::toDTO).collect(Collectors.toList());
+    }
+
+    //Search post by title
+    public List<PostsDTO> searchByTitle(String title){
+        if(title == null || title.trim().isEmpty()){
+            throw new IllegalArgumentException("Title cannot be empty");
+        }
+        List<Posts> posts = postsRepository.findByTitleContaining(title.trim());
+        return posts.stream().map(postsMapper::toDTO).collect(Collectors.toList());
+    }
+
+    //Search post by both title and content
+    public List<PostsDTO> searchByKeyword(String keyword){
+        if(keyword == null || keyword.trim().isEmpty()){
+            throw new IllegalArgumentException("Keyword cannot be empty");
+        }
+        List<Posts> posts = postsRepository.findByTitleOrContentContaining(keyword.trim());
+        return posts.stream().map(postsMapper::toDTO).collect(Collectors.toList());
+    }
+
+    //Search by category ID
+    public List<PostsDTO> searchByCategory(Long categoryId){
+        if(categoryId == null){
+            throw new IllegalArgumentException("Category cannot be null");
+        }
+        if(!categoryRepository.existsById(categoryId)){
+            throw new IllegalArgumentException("Category not found with id : " + categoryId);
+        }
+
+        List<Posts> posts = postsRepository.findByCategoryId(categoryId);
+        return posts.stream().map(postsMapper::toDTO).collect(Collectors.toList());
+    }
+
+    //Search by category name
+    public List<PostsDTO> searchByCategoryName(String categoryName){
+        if(categoryName == null || categoryName.trim().isEmpty()){
+            throw new IllegalArgumentException("Category name cannot be empty");
+        }
+
+        List<Posts> posts = postsRepository.findByCategoryNameContaining(categoryName.trim());
+        return posts.stream().map(postsMapper::toDTO).collect(Collectors.toList());
+    }
+
+    //Search by category and keyword
+    public List<PostsDTO> searchByCategoryAndKeyword(Long categoryId, String keyword){
+        if(categoryId == null && !(keyword == null || keyword.trim().isEmpty())){
+            throw new IllegalArgumentException("Either category id or keyword must be provided");
+        }
+        if(categoryId != null && !categoryRepository.existsById(categoryId)){
+            throw new IllegalArgumentException("Category not found with id : " + categoryId);
+        }
+        List<Posts> posts = postsRepository.findByCategoryAndKeyword(categoryId, keyword != null ? keyword.trim() : "");
+        return posts.stream().map(postsMapper::toDTO).collect(Collectors.toList());
+    }
+
+    //Get all categories with post count
+    public Map<String, Long> getCategoriesWithPostCount(){
+        List<Category> categories = categoryRepository.findAll();
+        return categories.stream().collect(
+                Collectors.toMap(Category::getCategoryName, category -> (long) category.getPosts().size()
+                        )
+        );
+    }
+
 }

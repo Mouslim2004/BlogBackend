@@ -88,6 +88,14 @@ We are going to create a blog for my portfolio using spring boot
 6. Then go to post service to implement solution method 
 7. Then close this by implement the request in controller 
 
+### Searching post part 2
+
+1. We gonna implement the business rule to search a post by his content category and title
+2. So go to post repository to implement the query
+3. Then create a specific post dto for search
+4. Then go to post service to implement methods
+5. Then finalize by going to post controller to implement api request
+
 
 
 

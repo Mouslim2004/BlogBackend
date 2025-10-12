@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/posts")
@@ -96,4 +97,84 @@ public class PostsController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    // Post keyword research
+
+    //Search by content
+    @GetMapping("/search/content")
+    public ResponseEntity<List<PostsDTO>> searchByContent(@RequestParam String content){
+        try{
+            List<PostsDTO> postsDTOS = postsService.searchByContent(content);
+            return ResponseEntity.ok(postsDTOS);
+        }catch(IllegalArgumentException e){
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    //Search by title
+    @GetMapping("/search/title")
+    public ResponseEntity<List<PostsDTO>> searchByTitle(@RequestParam String title){
+        try{
+            List<PostsDTO> postsDTOS = postsService.searchByTitle(title);
+            return ResponseEntity.ok(postsDTOS);
+        }catch(IllegalArgumentException e){
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    //Search by keyword (title or content)
+    @GetMapping("/search")
+    public ResponseEntity<List<PostsDTO>> searchByKeyword(@RequestParam String keyword){
+        try{
+            List<PostsDTO> postsDTOS = postsService.searchByKeyword(keyword);
+            return ResponseEntity.ok(postsDTOS);
+        }catch(IllegalArgumentException e){
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    //Search by category ID
+    @GetMapping("/category/{categoryId}")
+    public ResponseEntity<List<PostsDTO>> getPostsByCategory(@PathVariable Long categoryId){
+        try{
+            List<PostsDTO> postsDTOS = postsService.searchByCategory(categoryId);
+            return ResponseEntity.ok(postsDTOS);
+        }catch(IllegalArgumentException e){
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    //Search by category name
+    @GetMapping("/category/name/{categoryName}")
+    public ResponseEntity<List<PostsDTO>> getPostsByCategoryName(@PathVariable String categoryName){
+        try{
+            List<PostsDTO> postsDTOS = postsService.searchByCategoryName(categoryName);
+            return ResponseEntity.ok(postsDTOS);
+        }catch(IllegalArgumentException e){
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    //Combined search : category and keyword
+    @GetMapping("/search/combined")
+    public ResponseEntity<List<PostsDTO>> searchCombined(
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) String keyword
+    ){
+        try{
+            List<PostsDTO> postsDTOS = postsService.searchByCategoryAndKeyword(categoryId, keyword);
+            return ResponseEntity.ok(postsDTOS);
+        }catch(IllegalArgumentException e){
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    //Get categories with post count
+    @GetMapping("/categories/counts")
+    public ResponseEntity<Map<String, Long>> getCategoriesWithCount(){
+        Map<String, Long> categoriesWithCount = postsService.getCategoriesWithPostCount();
+        return ResponseEntity.ok(categoriesWithCount);
+    }
+
+
 }
