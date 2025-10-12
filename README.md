@@ -78,9 +78,15 @@ We are going to create a blog for my portfolio using spring boot
 2. So we gonna implement a class to extract tag within a content thanks to that pattern within utils package 
 3. Then we gonna head to post service to get the service when creating a post and try to retrieve tags in content
 
+### Searching post
 
-
-
+1. When looking for a post we have different way to do it as by his content, category or tag
+2. In this part we gonna start firstly start to look on a post by his tag
+3. So go to post repository to implement method to search post related by specific tag
+4. Then we gonna update tag repository which gonna look for a specific tag if exists 
+5. Then we gonna implement tag name dto to not expose our table details 
+6. Then go to post service to implement solution method 
+7. Then close this by implement the request in controller 
 
 
 

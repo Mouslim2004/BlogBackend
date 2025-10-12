@@ -6,6 +6,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+import java.util.List;
+
 public record PostsDTO(
         @NotNull(message = "ID cannot be null")
         Long id,
@@ -16,6 +18,7 @@ public record PostsDTO(
         @Size(min = 10, message = "Content must be at least 10 characters")
         String content,
         PostStatus status,
+        List<String> tags,
 
         @NotNull(message = "User ID is required")
         Long userId,

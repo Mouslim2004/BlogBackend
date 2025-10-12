@@ -1,7 +1,9 @@
 package com.comorosrising.service;
 
 import com.comorosrising.dto.PostsDTO;
+import com.comorosrising.dto.TagSearchDTO;
 import com.comorosrising.entity.*;
+import com.comorosrising.mapper.PostsMapper;
 import com.comorosrising.repository.PostsRepository;
 import com.comorosrising.repository.TagRepository;
 import com.comorosrising.repository.UserRepository;
@@ -11,10 +13,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class PostsService {
@@ -26,13 +26,15 @@ public class PostsService {
     private final CategoryService categoryService;
     private final TagRepository tagRepository;
     private final TagExtractor tagExtractor;
+    private final PostsMapper postsMapper;
 
-    public PostsService(PostsRepository postsRepository, UserService userService, CategoryService categoryService, TagRepository tagRepository, TagExtractor tagExtractor) {
+    public PostsService(PostsRepository postsRepository, UserService userService, CategoryService categoryService, TagRepository tagRepository, TagExtractor tagExtractor, PostsMapper postsMapper) {
         this.postsRepository = postsRepository;
         this.userService = userService;
         this.categoryService = categoryService;
         this.tagRepository = tagRepository;
         this.tagExtractor = tagExtractor;
+        this.postsMapper = postsMapper;
     }
 
     public List<Posts> getAllPosts(){
@@ -104,9 +106,9 @@ public class PostsService {
         return postsRepository.save(post);
     }
 
-    public boolean updatePosts(Long postId, Posts postToUpdate){
-        logger.info("Checking if user with id {} exist or not!", postToUpdate.getUser().getId());
-        User user = userService.getUser(postToUpdate.getUser().getId());
+    public boolean updatePosts(Long postId, PostsDTO postToUpdate){
+        logger.info("Checking if user with id {} exist or not!", postToUpdate.userId());
+        User user = userService.getUser(postToUpdate.userId());
         if(user == null){
             throw new IllegalArgumentException("Unauthorized action");
         }
@@ -114,9 +116,10 @@ public class PostsService {
 
         if (postsTOptional.isPresent()){
             Posts postToSave = postsTOptional.get();
-            postToSave.setTitle(postToUpdate.getTitle());
-            postToSave.setContent(postToUpdate.getContent());
+            postToSave.setTitle(postToUpdate.title());
+            postToSave.setContent(postToUpdate.content());
             postToSave.setUpdatedAt(LocalDateTime.now());
+            postToSave.setStatus(postToUpdate.status());
             postsRepository.save(postToSave);
             return true;
         }
@@ -137,5 +140,85 @@ public class PostsService {
         }catch(Exception e){
             return false;
         }
+    }
+
+    //Searching post by tag sector
+
+    // Search by single tag name
+    public List<PostsDTO> searchPostsByTag(String tagName){
+        if(tagName == null || tagName.trim().isEmpty()){
+            throw new IllegalArgumentException("Tag name cannot be empty");
+        }
+        List<Posts> posts = postsRepository.findByTagName(tagName.trim());
+        return posts.stream().map(postsMapper::toDTO).collect(Collectors.toList());
+    }
+
+    //Advanced search with multiple options
+    public List<PostsDTO> searchPostsByTags(TagSearchDTO searchDTO){
+        if(searchDTO==null){
+            throw new IllegalArgumentException("Search criteria cannot be null");
+        }
+
+        List<Posts> posts;
+
+        switch (searchDTO.searchType()){
+            case EXACT :
+                if(searchDTO.tagName() == null){
+                    throw new IllegalArgumentException("Tag name is required for EXACT search");
+                }
+                posts = postsRepository.findByTagName(searchDTO.tagName().trim());
+                break;
+
+            case ANY:
+                if(searchDTO.tagNames() == null || searchDTO.tagNames().isEmpty()){
+                    throw new IllegalArgumentException("Tag names are required for ANY search");
+                }
+                List<String> trimmedNames = searchDTO.tagNames().stream()
+                        .map(String::trim).collect(Collectors.toList());
+                posts = postsRepository.findByAnyTagNames(trimmedNames);
+                break;
+
+            case ALL:
+                if(searchDTO.tagNames() == null || searchDTO.tagNames().isEmpty()){
+                    throw new IllegalArgumentException("Tag names are required for ALL search");
+                }
+                List<String> trimmedNamesAll = searchDTO.tagNames().stream()
+                        .map(String::trim).collect(Collectors.toList());
+                posts = postsRepository.findByAllTagNames(trimmedNamesAll, trimmedNamesAll.size());
+                break;
+
+            case CONTAINS:
+                if(searchDTO.tagName() == null){
+                    throw new IllegalArgumentException("Tag name is required for CONTAINS search");
+                }
+                posts = postsRepository.findByTagNameContaining(searchDTO.tagName().trim());
+                break;
+
+            default:
+                throw new IllegalArgumentException("Unsupported search type : " + searchDTO.searchType());
+        }
+
+        return posts.stream().map(postsMapper::toDTO).collect(Collectors.toList());
+    }
+
+    //Get related post by tag
+    public List<PostsDTO> getRelatedPosts(Long postId, int limit){
+        Posts post = postsRepository.findById(postId).orElseThrow(
+                () -> new IllegalArgumentException("Post not found")
+        );
+        Set<Tag> postTags = post.getTags();
+        if(postTags.isEmpty()){
+            return new ArrayList<>();
+        }
+
+        List<String> tagNames = postTags.stream().map(Tag::getTagName).collect(Collectors.toList());
+
+        List<Posts> relatedPosts = postsRepository.findByAnyTagNames(tagNames).stream()
+                .filter(p -> !p.getId().equals(postId)) //exclude current post
+                .limit(limit)
+                .collect(Collectors.toList());
+
+        return relatedPosts.stream().map(postsMapper::toDTO).collect(Collectors.toList());
+
     }
 }

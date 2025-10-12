@@ -4,8 +4,12 @@ import com.comorosrising.dto.PostsDTO;
 import com.comorosrising.dto.UserDTO;
 import com.comorosrising.entity.Category;
 import com.comorosrising.entity.Posts;
+import com.comorosrising.entity.Tag;
 import com.comorosrising.entity.User;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class PostsMapper {
@@ -38,8 +42,13 @@ public class PostsMapper {
     }
 
     public PostsDTO toDTO(Posts posts){
+        List<String> tagNames = posts.getTags().stream().map(Tag::getTagName).collect(Collectors.toList());
         return  new PostsDTO(
-            posts.getId(), posts.getTitle(), posts.getContent(), posts.getStatus(),
+                posts.getId(),
+                posts.getTitle(),
+                posts.getContent(),
+                posts.getStatus(),
+                tagNames,
                 posts.getUser() != null ? posts.getUser().getId() : null,
                 //posts.getUser() != null ? posts.getUser().getName() : null,
                 posts.getCategory() != null ? posts.getCategory().getId() : null
