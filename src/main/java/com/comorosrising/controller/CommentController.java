@@ -6,6 +6,7 @@ import com.comorosrising.dto.UpdateCommentDTO;
 import com.comorosrising.service.CommentService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,6 +21,7 @@ public class CommentController {
         this.commentService = commentService;
     }
 
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @PostMapping
     public ResponseEntity<CommentResponseDTO> createComment(@RequestBody @Valid CommentDTO commentDTO){
         try{
@@ -58,6 +60,7 @@ public class CommentController {
         return ResponseEntity.ok(comments);
     }
 
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<CommentResponseDTO> updateComment(
             @PathVariable Long id,
@@ -71,6 +74,7 @@ public class CommentController {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteComment(@PathVariable Long id){
         try{

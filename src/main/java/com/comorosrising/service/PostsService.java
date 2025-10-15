@@ -54,7 +54,7 @@ public class PostsService {
         return posts;
     }
 
-    public Posts createPosts(PostsDTO postsDTO){
+    public Posts createPosts(PostsDTO postsDTO, String email){
         /*logger.info("Checking if user with id {} exist or not!", posts.getUser().getId());
         User user = userService.getUser(posts.getUser().getId());
         if(user == null){
@@ -64,18 +64,20 @@ public class PostsService {
         if(category == null){
             throw new IllegalArgumentException("Category must be assigned");
         }*/
-        if (postsDTO.userId() == null) {
-            throw new IllegalArgumentException("User ID must be provided");
+        User userEmail = userService.getUserByEmail(email);
+        if(userEmail == null){
+            throw new IllegalArgumentException("User not found with email: " + email);
         }
         if (postsDTO.categoryId() == null) {
             throw new IllegalArgumentException("Category ID must be provided");
         }
 
-        logger.info("Checking if user with id {} exists", postsDTO.userId());
-        User user = userService.getUser(postsDTO.userId());
+        logger.info("Checking if user with id {} exists", userEmail.getId());
+        User user = userService.getUser(userEmail.getId());
         if(user == null) {
             throw new IllegalArgumentException("User not found with id: " + postsDTO.userId());
         }
+
         // Get category
         Category category = categoryService.getCategory(postsDTO.categoryId());
         if(category ==null) {

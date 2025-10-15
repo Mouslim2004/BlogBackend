@@ -1,9 +1,13 @@
 package com.comorosrising.service;
 
+import com.comorosrising.dto.UserLoginDTO;
+import com.comorosrising.entity.Role;
 import com.comorosrising.entity.User;
 import com.comorosrising.repository.UserRepository;
+import com.comorosrising.security.JWTUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -17,9 +21,13 @@ public class UserService {
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JWTUtil jwtUtil;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, JWTUtil jwtUtil) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtUtil = jwtUtil;
     }
 
     public List<User> getAllUsers(){
@@ -28,6 +36,11 @@ public class UserService {
 
     public User getUser(Long userId){
         return userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+    public User getUserByEmail(String email){
+        return userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
@@ -63,6 +76,10 @@ public class UserService {
         if(user.getUpdatedAt() == null){
             user.setUpdatedAt(LocalDateTime.now());
         }
+        if(user.getRole() == null){
+            user.setRole(Role.USER);
+        }
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
     }
 
@@ -106,5 +123,15 @@ public class UserService {
             logger.error("Error deleting user with id: " + userId, e);
             return false;
         }
+    }
+
+    public String login(UserLoginDTO userLoginDTO) {
+        User user = userRepository.findByEmail(userLoginDTO.email())
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        if(!passwordEncoder.matches(userLoginDTO.password(), user.getPassword())){
+            throw new RuntimeException("Invalid credentials");
+        }
+
+        return jwtUtil.generateToken(user.getEmail(), user.getRole().name());
     }
 }

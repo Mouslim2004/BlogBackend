@@ -111,7 +111,13 @@ We are going to create a blog for my portfolio using spring boot
 11. Then we gonna customize our user details service within config package 
 12. Then we gonna create our jwt utility class within the security package 
 13. Then implement jwt auth filter 
-14. Then implement security config class 
+14. Then implement security config class
+
+### Implement authentication 
+
+1. Create AuthController class to manage log in and registration
+2. For the login we gonna create a specific dto to manage it called UserLoginDTO
+3. Then within auth controller implement login method 
 
 
 
