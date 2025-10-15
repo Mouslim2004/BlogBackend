@@ -2,9 +2,11 @@ package com.comorosrising.controller;
 
 import com.comorosrising.dto.PostsDTO;
 import com.comorosrising.dto.TagSearchDTO;
+import com.comorosrising.dto.UserDTO;
 import com.comorosrising.entity.Posts;
 import com.comorosrising.entity.User;
 import com.comorosrising.mapper.PostsMapper;
+import com.comorosrising.mapper.UserMapper;
 import com.comorosrising.repository.UserRepository;
 import com.comorosrising.service.PostsService;
 import org.springframework.http.HttpStatus;
@@ -26,11 +28,13 @@ public class PostsController {
     private final PostsService postsService;
     private final PostsMapper postsMapper;
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
-    public PostsController(PostsService postsService, PostsMapper postsMapper, UserRepository userRepository) {
+    public PostsController(PostsService postsService, PostsMapper postsMapper, UserRepository userRepository, UserMapper userMapper) {
         this.postsService = postsService;
         this.postsMapper = postsMapper;
         this.userRepository = userRepository;
+        this.userMapper = userMapper;
     }
 
     @GetMapping
@@ -65,9 +69,17 @@ public class PostsController {
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @PutMapping("/{postId}")
     public ResponseEntity<?> updatePost(@PathVariable("postId") Long postId, @RequestBody PostsDTO postsDTO){
-        boolean updatedPost = postsService.updatePosts(postId, postsDTO);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+        if(optionalUser.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        UserDTO userDTO = userMapper.toDTO(optionalUser.get());
+        boolean updatedPost = postsService.updatePosts(postId, postsDTO, userDTO.email());
         if(updatedPost){
-            return ResponseEntity.ok("Post updated successfully");
+            return ResponseEntity.ok(Map.of("message", "Post updated successfully"));
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
@@ -75,7 +87,15 @@ public class PostsController {
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @DeleteMapping("/{postId}")
     public ResponseEntity<?> deletePost(@PathVariable("postId") Long postId){
-        boolean deletedPost = postsService.deletePosts(postId);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+        if(optionalUser.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        UserDTO userDTO = userMapper.toDTO(optionalUser.get());
+        boolean deletedPost = postsService.deletePosts(postId, userDTO.email());
         if(deletedPost){
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }

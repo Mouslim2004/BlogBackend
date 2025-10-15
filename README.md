@@ -119,6 +119,9 @@ We are going to create a blog for my portfolio using spring boot
 2. For the login we gonna create a specific dto to manage it called UserLoginDTO
 3. Then within auth controller implement login method 
 
+### Implement authentication part II
+
+1. Implement authentication within all application (ex. when creating/updating a post or a comment)
 
 
 

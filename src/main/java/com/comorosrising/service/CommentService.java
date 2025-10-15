@@ -28,15 +28,15 @@ public class CommentService {
         this.userRepository = userRepository;
     }
 
-    public CommentResponseDTO createComment(CommentDTO commentDTO){
+    public CommentResponseDTO createComment(CommentDTO commentDTO, String email){
         if(commentDTO.content() == null || commentDTO.content().trim().isEmpty()){
             throw  new IllegalArgumentException("Comment content is required");
         }
         Posts posts = postsRepository.findById(commentDTO.postId())
                 .orElseThrow(() -> new IllegalArgumentException("Post not found with id : " + commentDTO.postId()));
 
-        User user = userRepository.findById(commentDTO.userId())
-                .orElseThrow(() -> new IllegalArgumentException("User not found with id : " + commentDTO.userId()));
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with email : " + email));
         Comment comment = new Comment();
         comment.setContent(commentDTO.content().trim());
         comment.setPost(posts);
@@ -68,9 +68,11 @@ public class CommentService {
         return CommentMapper.toDTO(comment);
     }
 
-    public CommentResponseDTO updateComment(Long id, String content){
+    public CommentResponseDTO updateComment(Long id, String content, String email){
         Comment comment = commentRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Comment not found with id : " + id));
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with email : " + email));
         if(content != null && !content.trim().isEmpty()){
             comment.setCreatedAt(LocalDateTime.now());
             comment.setContent(content.trim());
@@ -82,7 +84,9 @@ public class CommentService {
         throw new IllegalArgumentException("Content cannot be empty");
     }
 
-    public void deleteComment(Long id){
+    public void deleteComment(Long id, String email){
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with email : " + email));
         if(!commentRepository.existsById(id)){
             throw new IllegalArgumentException("Comment not found with id : " + id);
         }

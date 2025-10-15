@@ -111,9 +111,13 @@ public class PostsService {
         return postsRepository.save(post);
     }
 
-    public boolean updatePosts(Long postId, PostsDTO postToUpdate){
-        logger.info("Checking if user with id {} exist or not!", postToUpdate.userId());
-        User user = userService.getUser(postToUpdate.userId());
+    public boolean updatePosts(Long postId, PostsDTO postToUpdate, String email){
+        User userEmail = userService.getUserByEmail(email);
+        if(userEmail == null){
+            throw new IllegalArgumentException("User not found with email: " + email);
+        }
+        logger.info("Checking if user with id {} exist or not!", userEmail.getId());
+        User user = userService.getUser(userEmail.getId());
         if(user == null){
             throw new IllegalArgumentException("Unauthorized action");
         }
@@ -121,6 +125,9 @@ public class PostsService {
 
         if (postsTOptional.isPresent()){
             Posts postToSave = postsTOptional.get();
+            if(postToSave.getUser().getId() != user.getId() && !user.getRole().name().equals(Role.ADMIN)){
+                throw new IllegalArgumentException("Unauthorized action");
+            }
             postToSave.setTitle(postToUpdate.title());
             postToSave.setContent(postToUpdate.content());
             postToSave.setUpdatedAt(LocalDateTime.now());
@@ -131,8 +138,15 @@ public class PostsService {
         return false;
     }
 
-    public boolean deletePosts(Long postId){
+    public boolean deletePosts(Long postId, String email){
         Posts posts = postsRepository.findById(postId).orElseThrow(() -> new RuntimeException("Post not found"));
+        User userEmail = userService.getUserByEmail(email);
+        if(userEmail == null){
+            throw new IllegalArgumentException("User not found with email: " + email);
+        }
+        if(posts.getUser().getId() != userEmail.getId() && !userEmail.getRole().name().equals(Role.ADMIN)){
+            throw new IllegalArgumentException("Unauthorized action");
+        }
         if(posts != null){
             User user = userService.getUser(posts.getUser().getId());
             if(user == null){
