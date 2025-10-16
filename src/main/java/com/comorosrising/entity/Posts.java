@@ -24,6 +24,9 @@ public class Posts {
     @Enumerated(EnumType.STRING)
     private PostStatus status;
 
+    private String imageUrl;
+    private String publicId;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -143,4 +146,19 @@ public class Posts {
         this.updatedAt = updatedAt;
     }
 
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
+    public String getPublicId() {
+        return publicId;
+    }
+
+    public void setPublicId(String publicId) {
+        this.publicId = publicId;
+    }
 }

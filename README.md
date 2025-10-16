@@ -123,6 +123,11 @@ We are going to create a blog for my portfolio using spring boot
 
 1. Implement authentication within all application (ex. when creating/updating a post or a comment)
 
+### Adding image to the posts
 
+1. We gonna use cloudinary cloud for storing image in our application
+2. First we gonna set cloudinary details within application.yml (then we gonna set up the dependency for using cloudinary)
+3. Secondly we gonna config the class for connecting our app to cloudinary
+4. Now we gonna add imageUrl field into post table 
 
 

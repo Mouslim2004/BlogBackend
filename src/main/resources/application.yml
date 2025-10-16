@@ -1,10 +1,19 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5433/blog_backend_db
-    username: postgres
-    password: 0123456789
+    url: jdbc:postgresql://ep-weathered-mouse-a88r050a-pooler.eastus2.azure.neon.tech/blogDB?user=neondb_owner&password=npg_gFDM67XnRyxp&sslmode=require&channelBinding=require
+    #username: postgres
+    #password: 0123456789
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+cloudinary:
+  cloud_name: doxesuas5
+  api_key: 211931221328794
+  api_secret: k5nQLpr97sKnJChXR04HqjbXtqY

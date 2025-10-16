@@ -24,7 +24,9 @@ public record PostsDTO(
         Long userId,
 
         @NotNull(message = "Category ID is required")
-        Long categoryId
+        Long categoryId,
+
+        String imageUrl
 
         //UserOutputDTO user,
         //CategoryDTO category

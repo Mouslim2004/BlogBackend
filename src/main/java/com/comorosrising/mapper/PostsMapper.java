@@ -51,7 +51,8 @@ public class PostsMapper {
                 tagNames,
                 posts.getUser() != null ? posts.getUser().getId() : null,
                 //posts.getUser() != null ? posts.getUser().getName() : null,
-                posts.getCategory() != null ? posts.getCategory().getId() : null
+                posts.getCategory() != null ? posts.getCategory().getId() : null,
+                posts.getImageUrl()
                 //posts.getCategory() != null ? posts.getCategory().getCategoryName() : null
                 //userMapper.toOutputDTO(posts.getUser()),
                 //categoryMapper.toDTO(posts.getCategory())

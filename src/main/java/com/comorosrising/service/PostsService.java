@@ -1,5 +1,7 @@
 package com.comorosrising.service;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import com.comorosrising.dto.PostsDTO;
 import com.comorosrising.dto.TagSearchDTO;
 import com.comorosrising.entity.*;
@@ -12,7 +14,9 @@ import com.comorosrising.utils.TagExtractor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -29,8 +33,9 @@ public class PostsService {
     private final TagExtractor tagExtractor;
     private final PostsMapper postsMapper;
     private final CategoryRepository categoryRepository;
+    private final Cloudinary cloudinary;
 
-    public PostsService(PostsRepository postsRepository, UserService userService, CategoryService categoryService, TagRepository tagRepository, TagExtractor tagExtractor, PostsMapper postsMapper, CategoryRepository categoryRepository) {
+    public PostsService(PostsRepository postsRepository, UserService userService, CategoryService categoryService, TagRepository tagRepository, TagExtractor tagExtractor, PostsMapper postsMapper, CategoryRepository categoryRepository, Cloudinary cloudinary) {
         this.postsRepository = postsRepository;
         this.userService = userService;
         this.categoryService = categoryService;
@@ -38,6 +43,7 @@ public class PostsService {
         this.tagExtractor = tagExtractor;
         this.postsMapper = postsMapper;
         this.categoryRepository = categoryRepository;
+        this.cloudinary = cloudinary;
     }
 
     public List<Posts> getAllPosts(){
@@ -54,16 +60,11 @@ public class PostsService {
         return posts;
     }
 
-    public Posts createPosts(PostsDTO postsDTO, String email){
-        /*logger.info("Checking if user with id {} exist or not!", posts.getUser().getId());
-        User user = userService.getUser(posts.getUser().getId());
-        if(user == null){
-            throw new IllegalArgumentException("User id must be provided");
-        }
-        Category category = categoryService.getCategory(posts.getCategory().getId());
-        if(category == null){
-            throw new IllegalArgumentException("Category must be assigned");
-        }*/
+    /*public Posts createPosts(PostsDTO postsDTO, String email, MultipartFile file) throws IOException {
+
+        logger.info("=== MULTIPART REQUEST RECEIVED ===");
+        logger.info("Title: {}", postsDTO.title());
+        logger.info("File: {}", file != null ? file.getOriginalFilename() + " (" + file.getContentType() + ")" : "NULL");
         User userEmail = userService.getUserByEmail(email);
         if(userEmail == null){
             throw new IllegalArgumentException("User not found with email: " + email);
@@ -71,12 +72,15 @@ public class PostsService {
         if (postsDTO.categoryId() == null) {
             throw new IllegalArgumentException("Category ID must be provided");
         }
+        String fileUrl = null;
+        if(file != null && !file.isEmpty()) {
+            Map uploadFile = cloudinary.uploader().upload(file.getBytes(),
+                    ObjectUtils.asMap("resource_type", "auto")
+            );
+            fileUrl = uploadFile.get("secure_url").toString();
+        }
 
         logger.info("Checking if user with id {} exists", userEmail.getId());
-        User user = userService.getUser(userEmail.getId());
-        if(user == null) {
-            throw new IllegalArgumentException("User not found with id: " + postsDTO.userId());
-        }
 
         // Get category
         Category category = categoryService.getCategory(postsDTO.categoryId());
@@ -102,25 +106,123 @@ public class PostsService {
         post.setTitle(postsDTO.title());
         post.setContent(postsDTO.content());
         post.setStatus(postsDTO.status() != null ? postsDTO.status() : PostStatus.DRAFT);
-        post.setUser(user);
+        post.setUser(userEmail);
         post.setCategory(category);
+        post.setImageUrl(fileUrl);
         post.setTags(tags);
         post.setCreatedAt(LocalDateTime.now());
         post.setUpdatedAt(LocalDateTime.now());
 
         return postsRepository.save(post);
+    }*/
+
+    public Posts createPosts(PostsDTO postsDTO, String email, MultipartFile file) throws IOException {
+
+        System.out.println("=== SERVICE START ===");
+        System.out.println("S1. Entered createPosts service method");
+        System.out.println("S2. PostsDTO - title: " + postsDTO.title() + ", content: " + postsDTO.content());
+        System.out.println("S3. Email: " + email);
+        System.out.println("S4. File: " + (file != null ? file.getOriginalFilename() + " (size: " + file.getSize() + ")" : "NULL"));
+
+        User userEmail = userService.getUserByEmail(email);
+        System.out.println("S5. User from DB: " + (userEmail != null ? userEmail.getEmail() : "NULL"));
+
+        if(userEmail == null){
+            System.out.println("S6. ERROR: User not found");
+            throw new IllegalArgumentException("User not found with email: " + email);
+        }
+
+        if (postsDTO.categoryId() == null) {
+            System.out.println("S7. ERROR: Category ID is null");
+            throw new IllegalArgumentException("Category ID must be provided");
+        }
+        System.out.println("S8. Category ID: " + postsDTO.categoryId());
+
+        String fileUrl = null;
+        String publicId = null;
+        if(file != null && !file.isEmpty()) {
+            System.out.println("S9. Starting file upload to Cloudinary");
+            try {
+                Map uploadFile = cloudinary.uploader().upload(file.getBytes(),
+                        ObjectUtils.asMap("resource_type", "auto")
+                );
+                fileUrl = uploadFile.get("secure_url").toString();
+                publicId = uploadFile.get("public_id").toString();
+                System.out.println("S10. File uploaded successfully: " + fileUrl);
+            } catch (Exception e) {
+                System.out.println("S10. ERROR during file upload: " + e.getMessage());
+                throw e;
+            }
+        } else {
+            System.out.println("S9. No file to upload");
+        }
+
+        System.out.println("S11. Checking if user with id " + userEmail.getId() + " exists");
+
+        // Get category
+        Category category = categoryService.getCategory(postsDTO.categoryId());
+        System.out.println("S12. Category found: " + (category != null ? category.getCategoryName() : "NULL"));
+
+        if(category ==null) {
+            System.out.println("S13. ERROR: Category not found");
+            throw new IllegalArgumentException("Category not found with id: " + postsDTO.categoryId());
+        }
+
+        if(postsDTO.title() == null || postsDTO.title().isBlank()){
+            System.out.println("S14. ERROR: Title is blank");
+            throw  new IllegalArgumentException("Title must be provided");
+        }
+
+        Set<Tag> tags = new HashSet<>();
+        if(postsDTO.content() != null && !postsDTO.content().isBlank()){
+            System.out.println("S15. Extracting tags from content");
+            Set<String> tagNames = tagExtractor.extractTags(postsDTO.content());
+            System.out.println("S16. Extracted tags: " + tagNames);
+
+            for(String tagName : tagNames){
+                Tag tag = tagRepository.findByTagName(tagName).orElseGet(() -> {
+                    System.out.println("S17. Creating new tag: " + tagName);
+                    Tag newTag = new Tag();
+                    newTag.setTagName(tagName);
+                    return tagRepository.save(newTag);
+                });
+                tags.add(tag);
+            }
+        } else {
+            System.out.println("S15. No content for tag extraction");
+        }
+
+        System.out.println("S18. Creating Post entity");
+        Posts post = new Posts();
+        post.setTitle(postsDTO.title());
+        post.setContent(postsDTO.content());
+        post.setStatus(postsDTO.status() != null ? postsDTO.status() : PostStatus.DRAFT);
+        post.setUser(userEmail);
+        post.setCategory(category);
+        post.setImageUrl(fileUrl);
+        post.setPublicId(publicId);
+        post.setTags(tags);
+        post.setCreatedAt(LocalDateTime.now());
+        post.setUpdatedAt(LocalDateTime.now());
+
+        System.out.println("S19. Saving post to database");
+        Posts savedPost = postsRepository.save(post);
+        System.out.println("S20. Post saved with ID: " + savedPost.getId());
+        System.out.println("=== SERVICE END ===");
+
+        return savedPost;
     }
 
     public boolean updatePosts(Long postId, PostsDTO postToUpdate, String email){
-        User userEmail = userService.getUserByEmail(email);
-        if(userEmail == null){
+        User user = userService.getUserByEmail(email);
+        if(user == null){
             throw new IllegalArgumentException("User not found with email: " + email);
         }
-        logger.info("Checking if user with id {} exist or not!", userEmail.getId());
-        User user = userService.getUser(userEmail.getId());
+        logger.info("Checking if user with id {} exist or not!", user.getId());
+        /*User user = userService.getUser(userEmail.getId());
         if(user == null){
             throw new IllegalArgumentException("Unauthorized action");
-        }
+        }*/
         Optional<Posts> postsTOptional = postsRepository.findById(postId);
 
         if (postsTOptional.isPresent()){
@@ -154,6 +256,7 @@ public class PostsService {
             }
         }
         try {
+            cloudinary.uploader().destroy(posts.getPublicId(), Map.of());
             postsRepository.deleteById(postId);
             return true;
         }catch(Exception e){
